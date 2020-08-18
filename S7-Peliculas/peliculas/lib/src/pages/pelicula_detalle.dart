@@ -18,6 +18,7 @@ class PeliculaDetalle extends StatelessWidget {
             _posterTitulo(pelicula, context),
             _descripcion(pelicula),
             _crearCasting(pelicula),
+            _crearSimilares(pelicula),
             // _descripcion(pelicula),
             // _descripcion(pelicula),
             // _descripcion(pelicula),
@@ -151,6 +152,62 @@ class PeliculaDetalle extends StatelessWidget {
           )
         ],
       ),
+    );
+  }
+
+  Widget _crearSimilares(Pelicula pelicula) {
+    final peliProvider = new PeliculasProvider();
+    return FutureBuilder(
+      future: peliProvider.getSimilares(pelicula.id.toString()),
+      builder: (BuildContext context, AsyncSnapshot<List> snapshot) {
+        try {
+          if (snapshot.hasData) {
+            return _crearSimilaresPageView(snapshot.data);
+          } else {
+            return Center(child: CircularProgressIndicator());
+          }
+        } catch (e) {
+          print("no pasa nada oiga");
+        }
+      },
+    );
+  }
+
+  Widget _crearSimilaresPageView(List<Pelicula> peliculas) {
+    return SizedBox(
+      height: 200.0,
+      child: PageView.builder(
+          controller: PageController(viewportFraction: 0.3, initialPage: 1),
+          itemBuilder: (context, i) => _similarTarjeta(context, peliculas[i])),
+    );
+  }
+
+  Widget _similarTarjeta(BuildContext context, Pelicula pelicula) {
+    pelicula.uniqueId = '${pelicula.id}-similares';
+    final similares = Container(
+      child: Column(
+        children: <Widget>[
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20.0),
+            child: Hero(
+              tag: pelicula.uniqueId,
+              child: FadeInImage(
+                placeholder: AssetImage('assets/no-image.jpg'),
+                image: NetworkImage(pelicula.getPosterImg()),
+                height: 130,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          Text(pelicula.title)
+        ],
+      ),
+    );
+    return GestureDetector(
+      child: similares,
+      onTap: () {
+        Navigator.pushNamed(context, 'detalle', arguments: pelicula);
+      },
     );
   }
 }

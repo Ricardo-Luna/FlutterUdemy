@@ -75,6 +75,13 @@ class PeliculasProvider {
         {'api_key': _apiKey, 'language': _language, 'query': query});
     return _procesarRespuesta(url);
   }
+
+  Future<List<Pelicula>> getSimilares(String idPelicula) async {
+    final url = Uri.https(_url, '3/movie/$idPelicula/similar',
+        {'api_key': _apiKey, 'language': _language, 'movie_id': idPelicula});
+    return _procesarRespuesta(url);
+  }
+
   //Future<List<Pelicula>> getEnCines() async {
   //  final url = Uri.https(_url, '3/movie/now_playing',
   //      {'api_key': _apiKey, 'language': _language});
