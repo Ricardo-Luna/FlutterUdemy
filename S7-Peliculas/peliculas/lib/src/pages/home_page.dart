@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:peliculas/src/providers/peliculas_provider.dart';
+import 'package:peliculas/src/search/search_delegate.dart';
 import 'package:peliculas/src/widgets/card_swiper_widget.dart';
 import 'package:peliculas/src/widgets/movie_horizontal.dart';
 
@@ -7,14 +8,23 @@ class HomePage extends StatelessWidget {
   final peliculasProvider = new PeliculasProvider();
   @override
   Widget build(BuildContext context) {
+    peliculasProvider.getPopulares();
     return Scaffold(
-        resizeToAvoidBottomPadding: true,
+        resizeToAvoidBottomPadding: false,
         appBar: AppBar(
           centerTitle: true,
           title: Text("Películas en cines"),
           backgroundColor: Colors.indigoAccent,
           actions: <Widget>[
-            IconButton(icon: Icon(Icons.search), onPressed: () {})
+            IconButton(
+                icon: Icon(Icons.search),
+                onPressed: () {
+                  showSearch(
+                    context: context,
+                    delegate: DataSearch(),
+                    // query: 'hola'
+                  );
+                })
           ],
         ),
         body: Container(
@@ -54,15 +64,16 @@ class HomePage extends StatelessWidget {
             SizedBox(
               height: 5.0,
             ),
-            FutureBuilder(
-              future: peliculasProvider.getMoviesRequest('3/movie/popular'),
+            StreamBuilder(
+              stream: peliculasProvider.popularesStream,
               builder: (BuildContext context, AsyncSnapshot snapshot) {
                 //  snapshot.data?.forEach((p) => {print(p.title)});
                 return snapshot.hasData
-                    ? MovieHorizontal(peliculas: snapshot.data)
-                    : Container(
-                        height: 400.0,
-                        child: Center(child: CircularProgressIndicator()));
+                    ? MovieHorizontal(
+                        peliculas: snapshot.data,
+                        siguientePagina: peliculasProvider.getPopulares,
+                      )
+                    : Center(child: CircularProgressIndicator());
               },
             ),
           ],
