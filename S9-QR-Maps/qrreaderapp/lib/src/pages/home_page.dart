@@ -1,3 +1,4 @@
+import 'package:barcode_scan/platform_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:qrreaderapp/src/bloc/scan_bloc.dart';
 import 'package:qrreaderapp/src/models/scan_model.dart';
@@ -46,22 +47,22 @@ class _HomePageState extends State<HomePage> {
   scanQR() async {
     //https://pub.dev/packages/barcode_scan
     //geo:19.702555301679208,-103.46414938410648
-    dynamic futureString = 'https://pub.dev/packages/barcode_scan';
-    dynamic fs2 = 'geo:19.702555301679208,-103.46414938410648';
+    //  dynamic fs2 = 'geo:19.702555301679208,-103.46414938410648';
+    dynamic futureString = '';
+
+    try {
+      futureString = await BarcodeScanner.scan();
+    } catch (e) {
+      futureString = e.toString();
+    }
+
     if (futureString != null) {
       final scan = ScanModel(valor: futureString);
       scansBloc.agregarScan(scan);
-      final scan2 = ScanModel(valor: fs2);
-      scansBloc.agregarScan(scan2);
       utils.abrirScan(context, scan);
     }
 
-    // try {
-    //   futureString = await BarcodeScanner.scan();
-    // } catch (e) {
-    //   futureString = e.toString();
-    // }
-    // print('Future String: ${futureString.rawContent}');
+    print('Future String: ${futureString.rawContent}');
   }
 
   Widget _crearBottomNavigationBar() {
