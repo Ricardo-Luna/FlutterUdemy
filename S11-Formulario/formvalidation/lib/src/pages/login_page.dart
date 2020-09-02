@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:formvalidation/src/blocs/provider.dart';
 
 class LoginPage extends StatelessWidget {
   @override
@@ -10,6 +11,7 @@ class LoginPage extends StatelessWidget {
   }
 
   Widget _loginForm(context) {
+    final bloc = Provider.of(context);
     final size = MediaQuery.of(context).size;
     return SingleChildScrollView(
       child: Column(
@@ -43,11 +45,11 @@ class LoginPage extends StatelessWidget {
                   style: TextStyle(fontSize: 20.0),
                 ),
                 SizedBox(height: 40),
-                _crearEmail(),
+                _crearEmail(bloc),
                 SizedBox(height: 30),
-                _crearPassword(),
+                _crearPassword(bloc),
                 SizedBox(height: 30),
-                _crearBoton()
+                _crearBoton(bloc)
               ],
             ),
           ),
@@ -60,51 +62,88 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  Widget _crearEmail() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.0),
-      child: TextField(
-        keyboardType: TextInputType.emailAddress,
-        decoration: InputDecoration(
-            hintText: 'ejemplo@correo.com',
-            labelText: 'Correo Electrónico',
-            icon: Icon(
-              Icons.alternate_email,
-              color: Colors.deepPurple,
-            )),
-      ),
+  Widget _crearEmail(LoginBloc bloc) {
+    return StreamBuilder(
+      stream: bloc.emailStream,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 20.0),
+          child: TextField(
+            onChanged: bloc.changeEmail,
+            keyboardType: TextInputType.emailAddress,
+            decoration: InputDecoration(
+                hintText: 'ejemplo@correo.com',
+                labelText: 'Correo Electrónico',
+                counterText: snapshot.data,
+                errorText: snapshot.error,
+                icon: Icon(
+                  Icons.alternate_email,
+                  color: Colors.deepPurple,
+                )),
+          ),
+        );
+      },
     );
   }
 
-  Widget _crearPassword() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.0),
-      child: TextField(
-        obscureText: true,
-        keyboardType: TextInputType.emailAddress,
-        decoration: InputDecoration(
-            hintText: 'Contraseña',
-            labelText: 'Password',
-            icon: Icon(
-              Icons.lock_outline,
-              color: Colors.deepPurple,
-            )),
-      ),
+  Widget _crearPassword(LoginBloc bloc) {
+    return StreamBuilder(
+      stream: bloc.passwordStream,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 20.0),
+          child: TextField(
+            onChanged: bloc.changePassword,
+            obscureText: true,
+            keyboardType: TextInputType.emailAddress,
+            decoration: InputDecoration(
+
+                //  hintText: 'Contraseña',
+                labelText: 'Password',
+                counterText: snapshot.data,
+                errorText: snapshot.error,
+                icon: Icon(
+                  Icons.lock_outline,
+                  color: Colors.deepPurple,
+                )),
+          ),
+        );
+      },
     );
   }
 
-  Widget _crearBoton() {
-    return RaisedButton(
-      onPressed: () {},
-      elevation: 0.0,
-      color: Colors.deepPurple,
-      textColor: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.0)),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 80.0, vertical: 15.0),
-        child: Text('Ingresar'),
-      ),
+  Widget _crearBoton(LoginBloc bloc) {
+    //formValidStream
+
+    return StreamBuilder(
+      stream: bloc.formValidStream,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        return RaisedButton(
+          onPressed: snapshot.hasData
+              ? () {
+                  _login(bloc, context);
+                }
+              : null,
+          elevation: 0.0,
+          color: Colors.deepPurple,
+          textColor: Colors.white,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.0)),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 80.0, vertical: 15.0),
+            child: Text('Ingresar'),
+          ),
+        );
+      },
     );
+  }
+
+  _login(LoginBloc loginBloc, BuildContext context) {
+    print('========================');
+    print('email: ${loginBloc.email} \n');
+    print('pw: ${loginBloc.password} ');
+    print('========================');
+    Navigator.pushReplacementNamed(context, 'home');
   }
 
   Widget _crearFondo(BuildContext context) {
@@ -177,3 +216,5 @@ class LoginPage extends StatelessWidget {
     );
   }
 }
+//Stream<bool> get formValidStream =>
+//       Rx.combineLatest2(emailStream, passwStream, (e, p) => true);
